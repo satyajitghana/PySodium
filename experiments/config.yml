@@ -34,4 +34,4 @@ optimizer:
         momentum: 0.95
 
 training:
-    epochs: 10
+    epochs: 15

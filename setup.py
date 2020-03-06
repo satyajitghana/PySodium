@@ -1,7 +1,10 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open('README.md', 'r') as fh:
     long_description = fh.read()
+
+with open('requirements.txt', 'r') as fh:
+    required = fh.read().splitlines()
 
 setuptools.setup(
     name="sodium-pkg",  # Replace with your own username
@@ -19,4 +22,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    install_requires=required,
 )

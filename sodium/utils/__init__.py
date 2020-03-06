@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from .logger import setup_logger
-from .config import load_config
+from .config import load_config, setup_device, setup_param_groups, get_instance
 
 
 def seed_everything(seed: int) -> None:
