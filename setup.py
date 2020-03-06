@@ -7,7 +7,7 @@ with open('requirements.txt', 'r') as fh:
     required = fh.read().splitlines()
 
 setuptools.setup(
-    name="sodium-pkg",  # Replace with your own username
+    name="sodium",  # Replace with your own username
     version="0.0.1",
     author="Satyajit Ghana",
     author_email="satyajitghana7@gmail.com",
