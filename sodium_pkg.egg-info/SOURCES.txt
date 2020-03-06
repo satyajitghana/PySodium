@@ -1,7 +1,0 @@
-README.md
-setup.py
-sodium_pkg.egg-info/PKG-INFO
-sodium_pkg.egg-info/SOURCES.txt
-sodium_pkg.egg-info/dependency_links.txt
-sodium_pkg.egg-info/requires.txt
-sodium_pkg.egg-info/top_level.txt
