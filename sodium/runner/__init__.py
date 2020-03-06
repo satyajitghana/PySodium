@@ -29,15 +29,21 @@ def train(cfg: Dict) -> None:
 
     param_groups = setup_param_groups(model, cfg['optimizer'])
     optimizer = get_instance(module_optimizer, 'optimizer', cfg, param_groups)
-    # lr_scheduler = get_instance(
-    #     module_scheduler, 'lr_scheduler', cfg, optimizer)
 
     transforms = get_instance(module_aug, 'augmentation', cfg)
-    train_loader = get_instance(module_data, 'data_loader', cfg, transforms)
-    test_loader = train_loader.test_split()
 
-    lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer, max_lr=0.05, steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
+    # get the train and test loaders
+    train_loader, test_loader = get_instance(
+        module_data, 'data_loader', cfg, transforms).get_loaders()
+
+    if cfg['lr_scheduler']['type'] == 'OneCycleLR':
+        logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
+        sch_cfg = cfg['lr_scheduler']['args']
+        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
+    else:
+        lr_scheduler = get_instance(
+            module_scheduler, 'lr_scheduler', cfg, optimizer)
 
     logger.info('Getting loss function handle')
     loss = getattr(module_loss, cfg['loss'])

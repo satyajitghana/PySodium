@@ -51,6 +51,8 @@ class Trainer(BaseTrainer):
             if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
                 self.lr_scheduler.step()
 
+        torch.cuda.empty_cache()
+
         # check if there's a lr scheduler
         if (self.lr_scheduler is not None) and not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
             self.lr_scheduler.step()

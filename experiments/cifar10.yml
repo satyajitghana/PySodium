@@ -21,17 +21,16 @@ data_loader:
 
 loss: nll_loss
 
-# lr_scheduler:
-#     type: OneCycleLR
-#     args:
-#         gamma: 0.1
-#         step_size: 6
+lr_scheduler:
+    type: OneCycleLR
+    args:
+        max_lr: 0.01
 
 optimizer:
     type: SGD
     args:
-        lr: 0.008
+        lr: 0.001
         momentum: 0.95
 
 training:
-    epochs: 50
+    epochs: 10

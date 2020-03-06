@@ -1,6 +1,6 @@
-from torch.utils.data import DataLoader
+from torch.utils import data
 
 
-class BaseDataLoader(DataLoader):
-    def split_validation(self) -> DataLoader:
+class BaseDataLoader(data.DataLoader):
+    def test_split(self) -> data.DataLoader:
         return NotImplementedError

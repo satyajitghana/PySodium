@@ -4,19 +4,19 @@ from torchvision import datasets
 from torch.utils.data import DataLoader
 
 
-class MNISTDataLoader(BaseDataLoader):
+class MNISTDataLoader():
 
-    def __init__(self, transforms, data_dir, batch_size, shuffle, nworkers, train=True):
+    def __init__(self, transforms, data_dir, batch_size=64, shuffle=True, nworkers=2, pin_memory=True):
         self.data_dir = data_dir
 
-        self.train_loader = datasets.MNIST(
+        self.train_set = datasets.MNIST(
             self.data_dir,
-            train=train,
+            train=True,
             download=True,
             transform=transforms.build_transforms(train=True)
         )
 
-        self.test_loader = datasets.MNIST(
+        self.test_set = datasets.MNIST(
             self.data_dir,
             train=False,
             download=True,
@@ -24,28 +24,29 @@ class MNISTDataLoader(BaseDataLoader):
         )
 
         self.init_kwargs = {
+            'shuffle': shuffle,
             'batch_size': batch_size,
-            'num_workers': nworkers
+            'num_workers': nworkers,
+            'pin_memory': pin_memory
         }
-        super().__init__(self.train_loader, shuffle=shuffle, **self.init_kwargs)
 
-    def test_split(self):
-        return DataLoader(self.test_loader, **self.init_kwargs)
+    def get_loaders(self):
+        return DataLoader(self.train_set, **self.init_kwargs), DataLoader(self.test_set, **self.init_kwargs)
 
 
-class CIFAR10DataLoader(BaseDataLoader):
+class CIFAR10DataLoader():
 
-    def __init__(self, transforms, data_dir, batch_size, shuffle, nworkers, train=True):
+    def __init__(self, transforms, data_dir, batch_size=64, shuffle=True, nworkers=2, pin_memory=True):
         self.data_dir = data_dir
 
-        self.train_loader = datasets.CIFAR10(
+        self.train_set = datasets.CIFAR10(
             self.data_dir,
-            train=train,
+            train=True,
             download=True,
             transform=transforms.build_transforms(train=True)
         )
 
-        self.test_loader = datasets.CIFAR10(
+        self.test_set = datasets.CIFAR10(
             self.data_dir,
             train=False,
             download=True,
@@ -53,10 +54,11 @@ class CIFAR10DataLoader(BaseDataLoader):
         )
 
         self.init_kwargs = {
+            'shuffle': shuffle,
             'batch_size': batch_size,
-            'num_workers': nworkers
+            'num_workers': nworkers,
+            'pin_memory': pin_memory
         }
-        super().__init__(self.train_loader, shuffle=shuffle, **self.init_kwargs)
 
-    def test_split(self):
-        return DataLoader(self.test_loader, **self.init_kwargs)
+    def get_loaders(self):
+        return DataLoader(self.train_set, **self.init_kwargs), DataLoader(self.test_set, **self.init_kwargs)
