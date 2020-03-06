@@ -29,6 +29,8 @@ class BaseTrainer:
 
             self._train_epoch(epoch)  # train this epoch
 
+            print(f'\nTesting Epoch: {epoch}')
+
             self._test_epoch(epoch)  # test this epoch
 
     def _train_epoch(self, epoch: int) -> dict:

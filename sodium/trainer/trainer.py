@@ -1,4 +1,6 @@
 from sodium.utils import setup_logger
+
+
 from sodium.base import BaseTrainer
 
 from tqdm.auto import tqdm, trange
@@ -23,7 +25,7 @@ class Trainer(BaseTrainer):
         correct = 0
         total = 0
 
-        pbar = tqdm(self.train_loader)
+        pbar = tqdm(self.train_loader, dynamic_ncols=True)
 
         for batch_idx, (data, target) in enumerate(pbar):
 
@@ -48,7 +50,7 @@ class Trainer(BaseTrainer):
             correct += predicted.eq(target).sum().item()
 
             pbar.set_description(
-                desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={train_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total} {correct}/{total} | batch_id={batch_idx}')
+                desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={train_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
             if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
                 self.lr_scheduler.step()
@@ -67,7 +69,7 @@ class Trainer(BaseTrainer):
         correct = 0
         total = 0
 
-        pbar = tqdm(self.test_loader)
+        pbar = tqdm(self.test_loader, dynamic_ncols=True)
 
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(self.test_loader):
@@ -83,6 +85,6 @@ class Trainer(BaseTrainer):
                 correct += predicted.eq(target).sum().item()
 
                 pbar.set_description(
-                    desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={test_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total} {correct}/{total} | batch_id={batch_idx}')
+                    desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={test_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
         print(f'Test Accuracy: {100 * correct / total}')
