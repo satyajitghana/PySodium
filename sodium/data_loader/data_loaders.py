@@ -36,6 +36,9 @@ class MNISTDataLoader():
 
 class CIFAR10DataLoader():
 
+    class_names = ['airplane', 'automobile', 'bird', 'cat',
+                   'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
     def __init__(self, transforms, data_dir, batch_size=64, shuffle=True, nworkers=2, pin_memory=True):
         self.data_dir = data_dir
 

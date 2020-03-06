@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List, Tuple
 
 import yaml
 import torch
@@ -21,17 +22,26 @@ class BaseTrainer:
 
         self.epochs = config['training']['epochs']
 
-    def train(self):
+    def train(self) -> Tuple[List, List]:
         logger.info('Starting training ...')
         logger.info(f'Training the model for {self.epochs} epochs')
+
+        self.train_metric = []
+        self.test_metric = []
+
         for epoch in range(1, self.epochs+1):
             print(f'\nTraining Epoch: {epoch}')
 
-            self._train_epoch(epoch)  # train this epoch
+            trn_metric = self._train_epoch(epoch)  # train this epoch
 
             print(f'Testing Epoch: {epoch}')
 
-            self._test_epoch(epoch)  # test this epoch
+            tst_metric = self._test_epoch(epoch)  # test this epoch
+
+            self.train_metric.extend(trn_metric)
+            self.test_metric.extend(tst_metric)
+
+        return (self.train_metric, self.test_metric)
 
     def _train_epoch(self, epoch: int) -> dict:
         raise NotImplementedError

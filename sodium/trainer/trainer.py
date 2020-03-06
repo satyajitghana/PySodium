@@ -1,6 +1,6 @@
+from typing import Tuple, List
+
 from sodium.utils import setup_logger
-
-
 from sodium.base import BaseTrainer
 
 from tqdm.auto import tqdm, trange
@@ -17,7 +17,10 @@ class Trainer(BaseTrainer):
         self.test_loader = test_loader
         self.lr_scheduler = lr_scheduler
 
-    def _train_epoch(self, epoch: int) -> dict:
+    def _train_epoch(self, epoch: int) -> List[Tuple]:
+
+        loss_history = []
+        accuracy_history = []
 
         self.model.train()  # set the model in training mode
 
@@ -52,6 +55,9 @@ class Trainer(BaseTrainer):
             pbar.set_description(
                 desc=f'epoch={epoch-1+batch_idx/len(pbar):.2f} | loss={train_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
+            accuracy_history.append(100.*correct/total)
+            loss_history.append(train_loss)
+
             if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
                 self.lr_scheduler.step()
 
@@ -61,7 +67,12 @@ class Trainer(BaseTrainer):
         if (self.lr_scheduler is not None) and not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
             self.lr_scheduler.step()
 
-    def _test_epoch(self, epoch: int) -> dict:
+        return list(zip(loss_history, accuracy_history))
+
+    def _test_epoch(self, epoch: int) -> List[Tuple]:
+
+        loss_history = []
+        accuracy_history = []
 
         self.model.eval()  # set the model in evaluation mode
 
@@ -89,3 +100,8 @@ class Trainer(BaseTrainer):
 
         print(
             f'Test Set: Average Loss: {test_loss/len(self.test_loader):.8f}, Accuracy: {100 * correct / total:.2f} ({correct}/{total})')
+
+        loss_history.append(test_loss)
+        accuracy_history.append(100 * correct / total)
+
+        return list(zip(loss_history, accuracy_history))
