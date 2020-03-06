@@ -41,7 +41,7 @@ class BaseTrainer:
             tst_metric = self._test_epoch(epoch)  # test this epoch
 
             train_loss.extend(trn_metric[0])
-            train_accuracy.extend(trn_metric[0])
+            train_accuracy.extend(trn_metric[1])
             test_loss.extend(tst_metric[0])
             test_accracy.extend(tst_metric[1])
 
