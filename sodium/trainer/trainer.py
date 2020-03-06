@@ -50,7 +50,7 @@ class Trainer(BaseTrainer):
             correct += predicted.eq(target).sum().item()
 
             pbar.set_description(
-                desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={train_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
+                desc=f'epoch={epoch-1+batch_idx/len(pbar):.2f} | loss={train_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
             if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
                 self.lr_scheduler.step()
@@ -69,10 +69,10 @@ class Trainer(BaseTrainer):
         correct = 0
         total = 0
 
-        pbar = tqdm(self.test_loader, dynamic_ncols=True)
+        # pbar = tqdm(self.test_loader, dynamic_ncols=True)
 
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(pbar):
+            for batch_idx, (data, target) in enumerate(self.test_loader):
                 data, target = data.to(self.device), target.to(self.device)
 
                 output = self.model(data)
@@ -84,7 +84,8 @@ class Trainer(BaseTrainer):
                 total += target.size(0)
                 correct += predicted.eq(target).sum().item()
 
-                pbar.set_description(
-                    desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={test_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
+                # pbar.set_description(
+                #     desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={test_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
-        print(f'Test Accuracy: {100 * correct / total}')
+        print(
+            f'Test Set: Average Loss: {test_loss/total:.8f}, Accuracy: {100 * correct / total:.2f} ({correct}/{total})')
