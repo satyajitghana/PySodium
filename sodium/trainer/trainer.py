@@ -72,7 +72,7 @@ class Trainer(BaseTrainer):
         pbar = tqdm(self.test_loader, dynamic_ncols=True)
 
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(self.test_loader):
+            for batch_idx, (data, target) in enumerate(pbar):
                 data, target = data.to(self.device), target.to(self.device)
 
                 output = self.model(data)
