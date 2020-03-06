@@ -15,7 +15,6 @@ from sodium.utils import setup_logger, load_config, seed_everything
 from sodium.trainer import Trainer
 
 import sodium.runner as runner
-import sodium.plot as plot
 
 logger = setup_logger(__name__)
 
@@ -37,6 +36,4 @@ if __name__ == "__main__":
 
     config = load_config(args.config)
 
-    train_metric, test_metric = runner.train(config, tsai_mode=args.tsai_mode)
-
-    plot.plot_metrics(train_metric, test_metric)
+    runner.train(config, tsai_mode=args.tsai_mode)

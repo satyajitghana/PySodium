@@ -14,6 +14,7 @@ import sodium.data_loader.augmentation as module_aug
 import sodium.data_loader.data_loaders as module_data
 
 from sodium.trainer import Trainer
+import sodium.plot as plot
 
 logger = setup_logger(__name__)
 
@@ -56,6 +57,8 @@ def train(cfg: Dict, tsai_mode=False) -> None:
     trainer = Trainer(model, criterion, optimizer, cfg, device,
                       train_loader, test_loader, lr_scheduler=lr_scheduler)
 
-    trainer.train()
+    train_metric, test_metric = trainer.train()
 
     logger.info('Finished!')
+
+    plot.plot_metrics(train_metric, test_metric)

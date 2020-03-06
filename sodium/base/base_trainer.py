@@ -26,8 +26,10 @@ class BaseTrainer:
         logger.info('Starting training ...')
         logger.info(f'Training the model for {self.epochs} epochs')
 
-        self.train_metric = []
-        self.test_metric = []
+        train_loss = []
+        train_accuracy = []
+        test_loss = []
+        test_accracy = []
 
         for epoch in range(1, self.epochs+1):
             print(f'\nTraining Epoch: {epoch}')
@@ -38,8 +40,13 @@ class BaseTrainer:
 
             tst_metric = self._test_epoch(epoch)  # test this epoch
 
-            self.train_metric.extend(trn_metric)
-            self.test_metric.extend(tst_metric)
+            train_loss.extend(trn_metric[0])
+            train_accuracy.extend(trn_metric[0])
+            test_loss.extend(tst_metric[0])
+            test_accracy.extend(tst_metric[1])
+
+        self.train_metric = (train_loss, train_accuracy)
+        self.test_metric = (test_loss, test_accracy)
 
         return (self.train_metric, self.test_metric)
 
