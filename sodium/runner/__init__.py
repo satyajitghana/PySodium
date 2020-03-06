@@ -9,7 +9,6 @@ from types import ModuleType
 
 from sodium.utils import get_instance, setup_device, setup_param_groups, setup_logger, seed_everything
 
-import sodium.model.model as module_arch
 import sodium.model.loss as module_loss
 import sodium.data_loader.augmentation as module_aug
 import sodium.data_loader.data_loaders as module_data
@@ -19,7 +18,12 @@ from sodium.trainer import Trainer
 logger = setup_logger(__name__)
 
 
-def train(cfg: Dict) -> None:
+def train(cfg: Dict, tsai_mode=False) -> None:
+    if tsai_mode:
+        import sodium.tsai_model as module_arch
+    else:
+        import sodium.model.model as module_arch
+
     logger.info(f'Training: {cfg}')
     seed_everything(cfg['seed'])
 
@@ -46,10 +50,10 @@ def train(cfg: Dict) -> None:
             module_scheduler, 'lr_scheduler', cfg, optimizer)
 
     logger.info('Getting loss function handle')
-    loss = getattr(module_loss, cfg['loss'])
+    criterion = getattr(module_loss, cfg['criterion'])()
 
     logger.info('Initializing trainer')
-    trainer = Trainer(model, loss, optimizer, cfg, device,
+    trainer = Trainer(model, criterion, optimizer, cfg, device,
                       train_loader, test_loader, lr_scheduler=lr_scheduler)
 
     trainer.train()

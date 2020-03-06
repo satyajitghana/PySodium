@@ -12,24 +12,29 @@ class BaseTrainer:
     """Base Trainer for all models
     """
 
-    def __init__(self, model, loss, optimizer, config, device):
+    def __init__(self, model, criterion, optimizer, config, device):
         self.model = model
-        self.loss = loss
+        self.criterion = criterion
         self.optimizer = optimizer
         self.config = config
         self.device = device
 
-        self._setup_monitoring(config['training'])
+        self.epochs = config['training']['epochs']
 
     def train(self):
         logger.info('Starting training ...')
         logger.info(f'Training the model for {self.epochs} epochs')
         for epoch in range(1, self.epochs+1):
-            print(f'Training Epoch: {epoch}')
+            print(f'\nTraining Epoch: {epoch}')
 
-            self._train_epoch(epoch)
+            self._train_epoch(epoch)  # train this epoch
+
+            self._test_epoch(epoch)  # test this epoch
 
     def _train_epoch(self, epoch: int) -> dict:
+        raise NotImplementedError
+
+    def _test_epoch(self, epoch: int):
         raise NotImplementedError
 
     def _setup_monitoring(self, config: dict) -> None:
