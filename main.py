@@ -36,4 +36,11 @@ if __name__ == "__main__":
 
     config = load_config(args.config)
 
-    runner.train(config, tsai_mode=args.tsai_mode)
+    # create a runner
+    runner = runner.Runner(config)
+
+    # train the network
+    runner.train(tsai_mode=args.tsai_mode)
+
+    # plot metrics
+    runner.plot()

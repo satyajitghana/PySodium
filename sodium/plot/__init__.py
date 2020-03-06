@@ -12,7 +12,7 @@ def plot_metrics(train_metric, test_metric):
     fig.suptitle('Metrics')
     axs[0, 0].plot(train_losses)
     axs[0, 0].set_title("Training Loss")
-    axs[1, 0].plot(train_acc[4000:])
+    axs[1, 0].plot(train_acc)
     axs[1, 0].set_title("Training Accuracy")
     axs[0, 1].plot(test_losses)
     axs[0, 1].set_title("Test Loss")

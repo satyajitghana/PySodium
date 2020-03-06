@@ -19,46 +19,55 @@ import sodium.plot as plot
 logger = setup_logger(__name__)
 
 
-def train(cfg: Dict, tsai_mode=False) -> None:
-    if tsai_mode:
-        import sodium.tsai_model as module_arch
-    else:
-        import sodium.model.model as module_arch
+class Runner():
+    def __init__(self, config):
+        self.config = config
 
-    logger.info(f'Training: {cfg}')
-    seed_everything(cfg['seed'])
+    def train(self, tsai_mode=False):
+        cfg = self.config
 
-    model = get_instance(module_arch, 'arch', cfg)
+        if tsai_mode:
+            import sodium.tsai_model as module_arch
+        else:
+            import sodium.model.model as module_arch
 
-    model, device = setup_device(model, cfg['target_device'])
+        logger.info(f'Training: {cfg}')
+        seed_everything(cfg['seed'])
 
-    param_groups = setup_param_groups(model, cfg['optimizer'])
-    optimizer = get_instance(module_optimizer, 'optimizer', cfg, param_groups)
+        model = get_instance(module_arch, 'arch', cfg)
 
-    transforms = get_instance(module_aug, 'augmentation', cfg)
+        model, device = setup_device(model, cfg['target_device'])
 
-    # get the train and test loaders
-    train_loader, test_loader = get_instance(
-        module_data, 'data_loader', cfg, transforms).get_loaders()
+        param_groups = setup_param_groups(model, cfg['optimizer'])
+        optimizer = get_instance(
+            module_optimizer, 'optimizer', cfg, param_groups)
 
-    if cfg['lr_scheduler']['type'] == 'OneCycleLR':
-        logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
-        sch_cfg = cfg['lr_scheduler']['args']
-        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
-    else:
-        lr_scheduler = get_instance(
-            module_scheduler, 'lr_scheduler', cfg, optimizer)
+        transforms = get_instance(module_aug, 'augmentation', cfg)
 
-    logger.info('Getting loss function handle')
-    criterion = getattr(module_loss, cfg['criterion'])()
+        # get the train and test loaders
+        train_loader, test_loader = get_instance(
+            module_data, 'data_loader', cfg, transforms).get_loaders()
 
-    logger.info('Initializing trainer')
-    trainer = Trainer(model, criterion, optimizer, cfg, device,
-                      train_loader, test_loader, lr_scheduler=lr_scheduler)
+        if cfg['lr_scheduler']['type'] == 'OneCycleLR':
+            logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
+            sch_cfg = cfg['lr_scheduler']['args']
+            lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+                optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
+        else:
+            lr_scheduler = get_instance(
+                module_scheduler, 'lr_scheduler', cfg, optimizer)
 
-    train_metric, test_metric = trainer.train()
+        logger.info('Getting loss function handle')
+        criterion = getattr(module_loss, cfg['criterion'])()
 
-    logger.info('Finished!')
+        logger.info('Initializing trainer')
+        self.trainer = Trainer(model, criterion, optimizer, cfg, device,
+                               train_loader, test_loader, lr_scheduler=lr_scheduler)
 
-    plot.plot_metrics(train_metric, test_metric)
+        self.trainer.train()
+
+        logger.info('Finished!')
+
+    def plot(self):
+        logger.info('Plotting Metrics...')
+        plot.plot_metrics(self.trainer.train_metric, self.trainer.test_metric)
