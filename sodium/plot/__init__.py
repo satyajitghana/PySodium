@@ -5,8 +5,8 @@ plt.style.use("dark_background")
 
 
 def plot_metrics(train_metric, test_metric):
-    (train_acc, train_losses) = train_metric
-    (test_acc, test_losses) = test_metric
+    (train_losses, train_acc) = train_metric
+    (test_losses, test_acc) = test_metric
 
     fig, axs = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle('Metrics')
