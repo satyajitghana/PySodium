@@ -69,3 +69,8 @@ runner.plot()
 if you are using the library on a terminal, you can use the main.py and call
 
 `python main.py --config=config.yml`
+
+
+---
+
+Made with ❤ by shadowleaf.satyajit
