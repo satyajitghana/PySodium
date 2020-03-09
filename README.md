@@ -32,11 +32,10 @@ data_loader:
 
 loss: nll_loss
 
-# lr_scheduler:
-#     type: OneCycleLR
-#     args:
-#         gamma: 0.1
-#         step_size: 6
+lr_scheduler:
+    type: OneCycleLR
+    args:
+        max_lr: 0.1
 
 optimizer:
     type: SGD
@@ -51,9 +50,22 @@ training:
 3. Run the Model !
 
 ```python
+# import my baby-library
 from sodium.utils import load_config
 import sodium.runner as runner
 
-config = load_config('config.yml')
+# create a runner
+config = load_config('config.yml', tsai_mode=False)
+
+# train the network
 runner.train(config)
+
+# plot metrics
+runner.plot()
 ```
+
+## NOTE
+
+if you are using the library on a terminal, you can use the main.py and call
+
+`python main.py --config=config.yml`
