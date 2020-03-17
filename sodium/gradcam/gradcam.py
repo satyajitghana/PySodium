@@ -53,7 +53,7 @@ def plot_gradcam(gcam_layers, images, labels, probs, denormalize):
             heatmap = np.uint8(255 * heatmap)
             heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
             superimposed_img = cv2.resize(cv2.addWeighted(
-                img, 0.5, heatmap, 0.5, 0), (128, 128))
+                image, 0.5, heatmap, 0.5, 0), (128, 128))
             plt.imshow(superimposed_img)
 
     plt.show()
