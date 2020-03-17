@@ -15,7 +15,7 @@ def get_gradcam(images, labels, model, device, target_layers):
 
     gcam = GradCAM(model=model, candidate_layers=target_layers)
 
-    images = torch.stack(images).to(model.device)
+    images = torch.stack(images).to(device)
 
     probs, ids = gcam.forward(images)
 
