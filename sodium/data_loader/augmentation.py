@@ -64,11 +64,11 @@ class CIFAR10Albumentations(AugmentationFactoryBase):
 
     def build_train(self):
         train_transforms = A.Compose([
-            A.Rotate((-30.0, 30.0)),
+            A.Rotate((-15.0, 15.0), p=0.3),
             A.HorizontalFlip(),
             A.Normalize(mean=(0.4914, 0.4822, 0.4465),
                         std=(0.2023, 0.1994, 0.2010)),
-            A.Cutout(num_holes=4),
+            A.Cutout(num_holes=4, fill_value=list((0.4914, 0.4822, 0.4465))),
             AT.ToTensor()
         ])
 
