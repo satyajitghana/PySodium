@@ -44,16 +44,21 @@ def plot_gradcam(gcam_layers, images, labels, probs, denormalize):
 
     for idx, image in enumerate(images):
         denorm_img = np.uint8(255 * denormalize(image.view(3, 32, 32)))
-        plt.imshow(denorm_img)
         plt.axis('off')
+        plt.imshow(denorm_img, interpolation='bilinear')
+        plt.show()
 
-        for jdx, gcam_layer in enumerate(gcam_layers):
-            heatmap = 1 - gcam_layer[idx].cpu().numpy()[0]
+        for jdx in range(4):
+            heatmap = 1 - gcam_layers[len(images)*jdx + idx].cpu().numpy()[0]
 
             heatmap = np.uint8(255 * heatmap)
             heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+            # print(heatmap.shape)
+            # print(denorm_img.shape)
             superimposed_img = cv2.resize(cv2.addWeighted(
                 denorm_img, 0.5, heatmap, 0.5, 0), (128, 128))
-            plt.imshow(superimposed_img)
+            plt.axis('off')
+            plt.imshow(superimposed_img, interpolation='bilinear')
+            plt.show()
 
     plt.show()
