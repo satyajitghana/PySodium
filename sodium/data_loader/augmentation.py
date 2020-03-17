@@ -1,6 +1,20 @@
 import abc
 
 import torchvision.transforms as T
+import numpy as np
+
+import albumentations as A
+import albumentations.pytorch.transforms as AT
+
+
+class AlbumentationTransforms:
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, img):
+        img = np.array(img)
+
+        return self.transforms(image=img)['image']
 
 
 class AugmentationFactoryBase(abc.ABC):
@@ -44,3 +58,26 @@ class CIFAR10Transforms(AugmentationFactoryBase):
             T.ToTensor(),
             T.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         ])
+
+
+class CIFAR10Albumentations(AugmentationFactoryBase):
+
+    def build_train(self):
+        train_transforms = A.Compose([
+            # A.RandomCrop(height=32, width=32),
+            A.HorizontalFlip(),
+            A.Normalize(mean=(0.4914, 0.4822, 0.4465),
+                        std=(0.2023, 0.1994, 0.2010)),
+            AT.ToTensor()
+        ])
+
+        return AlbumentationTransforms(train_transforms)
+
+    def build_test(self):
+        test_transforms = A.Compose([
+            A.Normalize(mean=(0.4914, 0.4822, 0.4465),
+                        std=(0.2023, 0.1994, 0.2010)),
+            AT.ToTensor()
+        ])
+
+        return AlbumentationTransforms(test_transforms)

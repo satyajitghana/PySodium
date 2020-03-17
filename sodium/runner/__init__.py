@@ -19,7 +19,7 @@ import sodium.plot as plot
 logger = setup_logger(__name__)
 
 
-class Runner():
+class Runner:
     def __init__(self, config):
         self.config = config
 
@@ -32,10 +32,14 @@ class Runner():
             import sodium.model.model as module_arch
 
         logger.info(f'Training: {cfg}')
+
+        # to get consistent results, seed everything
         seed_everything(cfg['seed'])
 
+        # create a model instance
         model = get_instance(module_arch, 'arch', cfg)
 
+        # setup the model with the device
         model, device = setup_device(model, cfg['target_device'])
 
         param_groups = setup_param_groups(model, cfg['optimizer'])
