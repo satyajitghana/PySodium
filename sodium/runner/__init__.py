@@ -81,8 +81,6 @@ class Runner:
     def plot_gradcam(self, target_layers):
         logger.info('Plotting Grad-CAM...')
 
-        logger.info('for layers {target_layers}')
-
         # use the test images
         data, target = next(iter(self.trainer.test_loader))
         data, target = data.to(self.trainer.device), target.to(

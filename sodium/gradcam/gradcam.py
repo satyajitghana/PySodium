@@ -8,6 +8,10 @@ import numpy as np
 import cv2
 import seaborn as sns
 
+from sodium.utils import setup_logger
+
+logger = setup_logger(__name__)
+
 
 def get_gradcam(images, labels, model, device, target_layers):
     # move the model to device
@@ -36,7 +40,7 @@ def get_gradcam(images, labels, model, device, target_layers):
 
     # fetch the grad cam layers of all the images
     for target_layer in target_layers:
-        print(f'Generating Grad-CAM for {target_layer}')
+        logger.info(f'generating Grad-CAM for {target_layer}')
 
         # Grad-CAM
         regions = gcam.generate(target_layer=target_layer)
@@ -90,4 +94,5 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
             axs[image_idx, layer_idx+1].set_title(f'layer: {layer_name}')
             axs[image_idx, layer_idx+1].axis('off')
 
+    plt.tight_layout()
     plt.show()
