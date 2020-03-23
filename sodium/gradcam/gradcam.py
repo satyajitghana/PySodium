@@ -1,3 +1,4 @@
+import seaborn as sns
 from .core import GradCAM
 
 import matplotlib.pyplot as plt
@@ -5,6 +6,7 @@ import matplotlib.cm as cm
 import torch
 import numpy as np
 import cv2
+import seaborn as sns
 
 
 def get_gradcam(images, labels, model, device, target_layers):
@@ -23,7 +25,8 @@ def get_gradcam(images, labels, model, device, target_layers):
     pred_probs, pred_ids = gcam.forward(images)
 
     # actual class ids
-    target_ids = torch.LongTensor(labels).view(len(images), -1).to(device)
+    # target_ids = torch.LongTensor(labels).view(len(images), -1).to(device)
+    target_ids = labels.view(len(images), -1).to(device)
 
     # backward pass wrt to the actual ids
     gcam.backward(ids=target_ids)
@@ -38,7 +41,7 @@ def get_gradcam(images, labels, model, device, target_layers):
         # Grad-CAM
         regions = gcam.generate(target_layer=target_layer)
 
-        layers_region.setdefault(target_layer, []).append(regions)
+        layers_region[target_layer] = regions
 
     # we are done here, remove the hooks
     gcam.remove_hook()
@@ -46,51 +49,45 @@ def get_gradcam(images, labels, model, device, target_layers):
     return layers_region, pred_probs, pred_ids
 
 
-def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, denormalize, paper_cmap=False):
+sns.set()
+plt.style.use("dark_background")
 
-    image_shape = images.shape[1:]
 
-    plt.axis('off')
+def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_labels, denormalize, paper_cmap=False):
 
-    fig, axs = plt.subplots(nrows=len(images), ncols=len(gcam_layers.keys()))
+    images = images.cpu()
+    # convert BCHW to BHWC for plotting stufffff
+    images = images.permute(0, 2, 3, 1)
+    target_labels = target_labels.cpu()
 
-    fig.suptitle('Grad-CAM')
+    fig, axs = plt.subplots(nrows=len(images), ncols=len(
+        gcam_layers.keys())+1, figsize=(len(images)*3, len(gcam_layers.keys())*3))
+    fig.suptitle("Grad-CAM", fontsize=16)
 
-    for image_idx, image in images:
+    for image_idx, image in enumerate(images):
 
-        axs[image_idx, 0].imshow(image)
+        # denormalize the imaeg
+        denorm_img = denormalize(image.permute(2, 0, 1)).permute(1, 2, 0)
+
+        axs[image_idx, 0].imshow(
+            (denorm_img.numpy() * 255).astype(np.uint8),  interpolation='bilinear')
+        axs[image_idx, 0].set_title(
+            f'predicted: {class_labels[predicted_labels[image_idx][0] ]}\nactual: {class_labels[target_labels[image_idx]] }')
+        axs[image_idx, 0].axis('off')
 
         for layer_idx, layer_name in enumerate(gcam_layers.keys()):
-
             # gets H X W of the cam layer
             _layer = gcam_layers[layer_name][image_idx].cpu().numpy()[0]
-            cmap = cm.jet_r(_layer)[..., :3] * 255.0
+            heatmap = 1 - _layer
+            heatmap = np.uint8(255 * heatmap)
+            heatmap_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
-            gcam = (cmap.astype(np.float) +
-                    images[image_idx].astype(np.float))/2
-            gcam = np.uint8(gcam)
+            superimposed_img = cv2.addWeighted(
+                (denorm_img.numpy() * 255).astype(np.uint8), 0.5, heatmap_img, 0.5, 0)
 
-            axs[image_idx, layer_idx+1].imshow(gcam)
+            axs[image_idx, layer_idx +
+                1].imshow(superimposed_img, interpolation='bilinear')
+            axs[image_idx, layer_idx+1].set_title(f'layer: {layer_name}')
+            axs[image_idx, layer_idx+1].axis('off')
 
     plt.show()
-
-    # for idx, image in enumerate(images):
-    #     denorm_img = np.uint8(255 * denormalize(image.view(image_shape)))
-    #     plt.axis('off')
-    #     plt.imshow(denorm_img, interpolation='bilinear')
-    #     plt.show()
-
-    #     for jdx in range(4):
-    #         heatmap = 1 - gcam_layers[len(images)*jdx + idx].cpu().numpy()[0]
-
-    #         heatmap = np.uint8(255 * heatmap)
-    #         heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    #         # print(heatmap.shape)
-    #         # print(denorm_img.shape)
-    #         superimposed_img = cv2.resize(cv2.addWeighted(
-    #             denorm_img, 0.5, heatmap, 0.5, 0), (128, 128))
-    #         plt.axis('off')
-    #         plt.imshow(superimposed_img, interpolation='bilinear')
-    #         plt.show()
-
-    # plt.show()

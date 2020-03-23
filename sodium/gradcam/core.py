@@ -11,6 +11,9 @@ majority of the code taken from: https://github.com/kazuto1011/grad-cam-pytorch/
 
 Note:
 Images are stored as shape [BATCH B, CHANNEL C, HEIGHT H, WIDTH W]
+
+> from pytorch forum
+> No, we only support NCHW format. You can use .permute 20.1k to swap the axis.
 '''
 
 

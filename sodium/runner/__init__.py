@@ -15,6 +15,7 @@ import sodium.data_loader.data_loaders as module_data
 
 from sodium.trainer import Trainer
 import sodium.plot as plot
+from sodium.gradcam import get_gradcam, plot_gradcam
 
 logger = setup_logger(__name__)
 
@@ -46,11 +47,12 @@ class Runner:
         optimizer = get_instance(
             module_optimizer, 'optimizer', cfg, param_groups)
 
-        transforms = get_instance(module_aug, 'augmentation', cfg)
+        self.transforms = get_instance(module_aug, 'augmentation', cfg)
 
         # get the train and test loaders
-        train_loader, test_loader = get_instance(
-            module_data, 'data_loader', cfg, transforms).get_loaders()
+        self.data_loader = get_instance(
+            module_data, 'data_loader', cfg, self.transforms)
+        train_loader, test_loader = self.data_loader.get_loaders()
 
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
@@ -72,6 +74,32 @@ class Runner:
 
         logger.info('Finished!')
 
-    def plot(self):
+    def plot_metrics(self):
         logger.info('Plotting Metrics...')
         plot.plot_metrics(self.trainer.train_metric, self.trainer.test_metric)
+
+    def plot_gradcam(self, target_layers):
+        logger.info('Plotting Grad-CAM...')
+
+        logger.info('for layers {target_layers}')
+
+        # use the test images
+        data, target = next(iter(self.trainer.test_loader))
+        data, target = data.to(self.trainer.device), target.to(
+            self.trainer.device)
+
+        logger.info('Taking {5} samples')
+        # get 5 images
+        data = data[:5]
+        target = target[:5]
+
+        # get the generated grad cam
+        gcam_layers, predicted_probs, predicted_classes = get_gradcam(
+            data, target, self.trainer.model, self.trainer.device, target_layers)
+
+        # get the denomarlization function
+        unorm = module_aug.UnNormalize(
+            mean=self.transforms.mean, std=self.transforms.std)
+
+        plot_gradcam(gcam_layers, data, target, predicted_classes,
+                     self.data_loader.class_names, unorm)
