@@ -8,15 +8,24 @@ from tqdm import tqdm
 
 '''
 majority of the code taken from: https://github.com/kazuto1011/grad-cam-pytorch/blob/master/grad_cam.py
+
+Note:
+Images are stored as shape [BATCH B, CHANNEL C, HEIGHT H, WIDTH W]
 '''
 
 
 class _BaseWrapper(object):
     def __init__(self, model):
         super(_BaseWrapper, self).__init__()
+
+        # assuming all parameters are on the same device
         self.device = next(model.parameters()).device
+
+        # save the model
         self.model = model
-        self.handlers = []  # a set of hook function handlers
+
+        # a set of hook function handlers
+        self.handlers = []
 
     def _encode_one_hot(self, ids):
         one_hot = torch.zeros_like(self.logits).to(self.device)
@@ -24,79 +33,38 @@ class _BaseWrapper(object):
         return one_hot
 
     def forward(self, image):
+        # get H X W
         self.image_shape = image.shape[2:]
+
+        # apply the model
         self.logits = self.model(image)
+
+        # get the loss by converging along all the channels, dim = CHANNEL
+        # sum along CHANNEL is going to be 1, softmax does that
         self.probs = F.softmax(self.logits, dim=1)
-        return self.probs.sort(dim=1, descending=True)  # ordered results
+
+        # ordered results
+        return self.probs.sort(dim=1, descending=True)
 
     def backward(self, ids):
-        """
-        Class-specific backpropagation
-        """
+        '''Class-specific backpropagation'''
+
+        # convert the class id to one hot vector
         one_hot = self._encode_one_hot(ids)
+
+        # zero out the gradients
         self.model.zero_grad()
+
+        # calculate the gradient wrt to the class activations
         self.logits.backward(gradient=one_hot, retain_graph=True)
 
     def generate(self):
         raise NotImplementedError
 
     def remove_hook(self):
-        """
-        Remove all the forward/backward hook functions
-        """
+        '''Remove all the forward/backward hook functions'''
         for handle in self.handlers:
             handle.remove()
-
-
-class BackPropagation(_BaseWrapper):
-    def forward(self, image):
-        self.image = image.requires_grad_()
-        return super(BackPropagation, self).forward(self.image)
-
-    def generate(self):
-        gradient = self.image.grad.clone()
-        self.image.grad.zero_()
-        return gradient
-
-
-class GuidedBackPropagation(BackPropagation):
-    """
-    "Striving for Simplicity: the All Convolutional Net"
-    https://arxiv.org/pdf/1412.6806.pdf
-    Look at Figure 1 on page 8.
-    """
-
-    def __init__(self, model):
-        super(GuidedBackPropagation, self).__init__(model)
-
-        def backward_hook(module, grad_in, grad_out):
-            # Cut off negative gradients
-            if isinstance(module, nn.ReLU):
-                return (F.relu(grad_in[0]),)
-
-        for module in self.model.named_modules():
-            self.handlers.append(
-                module[1].register_backward_hook(backward_hook))
-
-
-class Deconvnet(BackPropagation):
-    """
-    "Striving for Simplicity: the All Convolutional Net"
-    https://arxiv.org/pdf/1412.6806.pdf
-    Look at Figure 1 on page 8.
-    """
-
-    def __init__(self, model):
-        super(Deconvnet, self).__init__(model)
-
-        def backward_hook(module, grad_in, grad_out):
-            # Cut off negative gradients and ignore ReLU
-            if isinstance(module, nn.ReLU):
-                return (F.relu(grad_out[0]),)
-
-        for module in self.model.named_modules():
-            self.handlers.append(
-                module[1].register_backward_hook(backward_hook))
 
 
 class GradCAM(_BaseWrapper):
@@ -136,7 +104,7 @@ class GradCAM(_BaseWrapper):
         if target_layer in pool.keys():
             return pool[target_layer]
         else:
-            raise ValueError("Invalid layer name: {}".format(target_layer))
+            raise ValueError(f'Invalid layer name: {target_layer}')
 
     def generate(self, target_layer):
         fmaps = self._find(self.fmap_pool, target_layer)
@@ -149,6 +117,7 @@ class GradCAM(_BaseWrapper):
             gcam, self.image_shape, mode="bilinear", align_corners=False
         )
 
+        # rescale features between 0 and 1
         B, C, H, W = gcam.shape
         gcam = gcam.view(B, -1)
         gcam -= gcam.min(dim=1, keepdim=True)[0]
@@ -156,62 +125,3 @@ class GradCAM(_BaseWrapper):
         gcam = gcam.view(B, C, H, W)
 
         return gcam
-
-
-def occlusion_sensitivity(
-    model, images, ids, mean=None, patch=35, stride=1, n_batches=128
-):
-    """
-    "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization"
-    https://arxiv.org/pdf/1610.02391.pdf
-    Look at Figure A5 on page 17
-    Originally proposed in:
-    "Visualizing and Understanding Convolutional Networks"
-    https://arxiv.org/abs/1311.2901
-    """
-
-    torch.set_grad_enabled(False)
-    model.eval()
-    mean = mean if mean else 0
-    patch_H, patch_W = patch if isinstance(patch, Sequence) else (patch, patch)
-    pad_H, pad_W = patch_H // 2, patch_W // 2
-
-    # Padded image
-    images = F.pad(images, (pad_W, pad_W, pad_H, pad_H), value=mean)
-    B, _, H, W = images.shape
-    new_H = (H - patch_H) // stride + 1
-    new_W = (W - patch_W) // stride + 1
-
-    # Prepare sampling grids
-    anchors = []
-    grid_h = 0
-    while grid_h <= H - patch_H:
-        grid_w = 0
-        while grid_w <= W - patch_W:
-            grid_w += stride
-            anchors.append((grid_h, grid_w))
-        grid_h += stride
-
-    # Baseline score without occlusion
-    baseline = model(images).detach().gather(1, ids)
-
-    # Compute per-pixel logits
-    scoremaps = []
-    for i in tqdm(range(0, len(anchors), n_batches), leave=False):
-        batch_images = []
-        batch_ids = []
-        for grid_h, grid_w in anchors[i: i + n_batches]:
-            images_ = images.clone()
-            images_[..., grid_h: grid_h + patch_H,
-                    grid_w: grid_w + patch_W] = mean
-            batch_images.append(images_)
-            batch_ids.append(ids)
-        batch_images = torch.cat(batch_images, dim=0)
-        batch_ids = torch.cat(batch_ids, dim=0)
-        scores = model(batch_images).detach().gather(1, batch_ids)
-        scoremaps += list(torch.split(scores, B))
-
-    diffmaps = torch.cat(scoremaps, dim=1) - baseline
-    diffmaps = diffmaps.view(B, new_H, new_W)
-
-    return diffmaps
