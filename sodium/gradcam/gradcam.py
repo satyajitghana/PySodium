@@ -65,7 +65,7 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
     target_labels = target_labels.cpu()
 
     fig, axs = plt.subplots(nrows=len(images), ncols=len(
-        gcam_layers.keys())+1, figsize=(len(images)*3, len(gcam_layers.keys())*3))
+        gcam_layers.keys())+1, figsize=(len(gcam_layers.keys())*3, len(images)*3))
     fig.suptitle("Grad-CAM", fontsize=16)
 
     for image_idx, image in enumerate(images):
