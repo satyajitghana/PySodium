@@ -13,7 +13,7 @@ import sodium.model.loss as module_loss
 import sodium.data_loader.augmentation as module_aug
 import sodium.data_loader.data_loaders as module_data
 
-from sodium.trainer import Trainer, LRFinder
+from sodium.trainer import Trainer
 import sodium.plot as plot
 from sodium.gradcam import get_gradcam, plot_gradcam
 
@@ -29,9 +29,19 @@ class Runner:
     def __init__(self, config):
         self.config = config
 
-    def find_lr(self):
-        logger.info('finding the best learning rate')
-        self.lr_finder.find_lr()
+    # def find_lr(self):
+    #     logger.info('finding the best learning rate')
+
+    #     self.lr_finder =
+
+    #     self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
+    #                               end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+
+    #     self.lr_finder.find_lr()
+    #     self.lr_finder.plot()
+    #     self.lr_finder.reset()
+
+    #     plt.show()
 
     def train(self):
         self.trainer.train()
@@ -73,10 +83,6 @@ class Runner:
 
         logger.info('Getting loss function handle')
         criterion = getattr(module_loss, cfg['criterion'])()
-
-        # create the lr finder without the scheduler
-        self.lr_finder = LRFinder(model, copy.deepcopy(
-            optimizer), criterion, device, train_loader, test_loader)
 
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')

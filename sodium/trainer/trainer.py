@@ -6,32 +6,12 @@ from sodium.base import BaseTrainer
 from tqdm.auto import tqdm, trange
 import torch
 
-# from torch_lr_finder import LRFinder
-import torch_lr_finder as lr_finder
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set()
 plt.style.use("dark_background")
 
 logger = setup_logger(__name__)
-
-
-class LRFinder:
-    def __init__(self, model, optimizer, criterion, device, train_loader, test_loader):
-        self.lr_finder = lr_finder.LRFinder(
-            model, optimizer, criterion, device)
-        self.train_loader = train_loader
-        self.test_loader = test_loader
-
-    def find_lr(self):
-
-        self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
-                                  end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
-        self.lr_finder.plot()
-        self.lr_finder.reset()
-
-        plt.show()
 
 
 class Trainer(BaseTrainer):
