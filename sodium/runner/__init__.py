@@ -204,10 +204,10 @@ class Runner:
                 pred = output.argmax(dim=1, keepdim=True)
 
                 # get the current misclassified in this batch
-                list_misclassified = (pred.eq(target.view_as(pred)) == False)
+                list_misclassified = (target.eq(pred.view_as(target)) == False)
                 batch_misclassified = data[list_misclassified]
                 batch_mis_pred = pred[list_misclassified]
-                batch_mis_target = target.view_as(pred)[list_misclassified]
+                batch_mis_target = target[list_misclassified]
 
                 # batch_misclassified =
 
