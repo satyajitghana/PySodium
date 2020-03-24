@@ -22,6 +22,9 @@ import pprint
 
 import copy
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
 
 logger = setup_logger(__name__)
 
@@ -56,11 +59,13 @@ class Runner:
 
         self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
 
-        self.lr_finder.range_test(self.trainer.train_loader, val_loader=self.trainer.test_loader, start_lr=1e-3,
-                                  end_lr=2, num_iter=len(self.trainer.train_loader)//self.trainer.train_loader.batch_size, step_mode='exp')
+        self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
+                                  end_lr=5, num_iter=len(self.trainer.train_loader), step_mode='exp')
 
+        plt.style.use("dark_background")
         self.lr_finder.plot()
         self.lr_finder.reset()
+        plt.show()
 
         del model, optimizer, criterion
 
