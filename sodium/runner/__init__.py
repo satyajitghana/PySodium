@@ -175,3 +175,63 @@ class Runner:
 
         plot_gradcam(gcam_layers, data, target, predicted_classes,
                      self.data_loader.class_names, unorm)
+
+    def plot_misclassifications(self, target_layers):
+        assert(self.trainer.model is not None)
+        # get the data, target of only missclassified and do what you do for gradcam
+
+        logger.info('getting misclassifications')
+
+        misclassified = []
+        misclassified_target = []
+        misclassified_pred = []
+
+        model, device = self.trainer.model, self.trainer.device
+
+        # set the model to evaluation mode
+        model.eval()
+
+        # turn off gradients
+        with torch.no_grad():
+            for data, target in self.trainer.test_loader:
+                # move them to respective device
+                data, target = data.to(device), target.to(device)
+
+                # do inferencing
+                output = model(data)
+
+                # get the predicted output
+                pred = output.argmax(dim=1, keepdim=True)
+
+                # get the current misclassified in this batch
+                list_misclassified = (pred.eq(target.view_as(pred)) == False)
+                batch_misclassified = data[list_misclassified]
+                batch_mis_pred = pred[list_misclassified]
+                batch_mis_target = target.view_as(pred)[list_misclassified]
+
+                # batch_misclassified =
+
+                misclassified.append(batch_misclassified)
+                misclassified_pred.append(batch_mis_pred)
+                misclassified_target.append(batch_mis_target)
+
+        # group all the batched together
+        misclassified = torch.cat(misclassified)
+        misclassified_pred = torch.cat(misclassified_pred)
+        misclassified_target = torch.cat(misclassified_target)
+
+        logger.info('Taking {5} samples')
+        # get 5 images
+        data = misclassified[:5]
+        target = misclassified_target[:5]
+
+        # get the generated grad cam
+        gcam_layers, predicted_probs, predicted_classes = get_gradcam(
+            data, target, self.trainer.model, self.trainer.device, target_layers)
+
+        # get the denomarlization function
+        unorm = module_aug.UnNormalize(
+            mean=self.transforms.mean, std=self.transforms.std)
+
+        plot_gradcam(gcam_layers, data, target, predicted_classes,
+                     self.data_loader.class_names, unorm)
