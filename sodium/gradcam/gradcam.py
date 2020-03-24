@@ -97,5 +97,5 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
             axs[image_idx, layer_idx+2].axis('off')
 
     plt.tight_layout()
-    plt.subplots_adjust(top=0.9, wspace=0.2, hspace=0.2)
+    plt.subplots_adjust(top=0.95, wspace=0.2, hspace=0.2)
     plt.show()
