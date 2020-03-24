@@ -17,18 +17,19 @@ plt.style.use("dark_background")
 logger = setup_logger(__name__)
 
 
-class LRFinder(lr_finder.LRFinder):
+class LRFinder:
     def __init__(self, model, optimizer, criterion, device, train_loader, test_loader):
-        super().__init__(model, optimizer, criterion, device=device)
+        self.lr_finder = lr_finder.LRFinder(
+            model, optimizer, criterion, device)
         self.train_loader = train_loader
         self.test_loader = test_loader
 
     def find_lr(self):
 
-        self.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
-                        end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
-        self.plot()
-        self.reset()
+        self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
+                                  end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+        self.lr_finder.plot()
+        self.lr_finder.reset()
 
         plt.show()
 
