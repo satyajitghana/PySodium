@@ -15,5 +15,6 @@ def setup_logger(name):
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(logger_format)
     logger.addHandler(stream_handler)
+    logger.propagate = False
 
     return logger  # return the logger

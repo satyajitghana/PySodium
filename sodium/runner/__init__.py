@@ -62,14 +62,34 @@ class Runner:
         self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
                                   end_lr=5, num_iter=len(self.trainer.train_loader), step_mode='exp')
 
+        self.best_lr = self.lr_finder.history['lr'][self.lr_finder.history['loss'].index(
+            self.lr_finder.best_loss)]
+
+        sorted_lrs = [x for _, x in sorted(
+            zip(self.lr_finder.history['loss'], self.lr_finder.history['lr']))]
+
+        logger.info(f'sorted lrs : {sorted_lrs[:10]}')
+
+        logger.info(f'found the best lr : {self.best_lr}')
+
+        logger.info('plotting lr_finder')
+
         plt.style.use("dark_background")
         self.lr_finder.plot()
         self.lr_finder.reset()
+        plt.annotate(f'{self.best_lr}',
+                     (self.best_lr, self.lr_finder.best_loss))
         plt.show()
 
         del model, optimizer, criterion
 
-    def train(self):
+    def train(self, use_bestlr=False):
+
+        # if the best lr was found use that value instead
+        if use_bestlr and self.best_lr is not None:
+            for param_group in self.trainer.optimizer.param_groups:
+                param_group['lr'] = self.best_lr
+
         self.trainer.train()
         logger.info('Finished!')
 
