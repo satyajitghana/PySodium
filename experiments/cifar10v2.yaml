@@ -1,4 +1,4 @@
-name: CIFAR10_MyNet
+name: CIFAR10_V2
 save_dir: saved/
 seed: 1
 target_device: 0

@@ -132,18 +132,20 @@ class Runner:
         logger.info('Getting loss function handle')
         criterion = getattr(module_loss, cfg['criterion'])()
 
+        batch_scheduler = False
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
             sch_cfg = cfg['lr_scheduler']['args']
             lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
+            batch_scheduler = True
         else:
             lr_scheduler = get_instance(
                 module_scheduler, 'lr_scheduler', cfg, optimizer)
 
         logger.info('Initializing trainer')
         self.trainer = Trainer(model, criterion, optimizer, cfg, device,
-                               train_loader, test_loader, lr_scheduler=lr_scheduler, batch_scheduler=cfg['lr_scheduler']['args']['batch_scheduler'])
+                               train_loader, test_loader, lr_scheduler=lr_scheduler, batch_scheduler=batch_scheduler)
 
     def plot_metrics(self):
         logger.info('Plotting Metrics...')
