@@ -40,7 +40,7 @@ class BaseTrainer:
                 lr_value = [group['lr']
                             for group in self.optimizer.param_groups][0]
                 logger.info(f'LR was set to : {lr_value}')
-                lr_metric.extend(lr_value)
+                lr_metric.append(lr_value)
 
             trn_metric = self._train_epoch(epoch)  # train this epoch
 
