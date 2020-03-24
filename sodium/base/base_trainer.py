@@ -37,8 +37,10 @@ class BaseTrainer:
             logger.info(f'Training Epoch: {epoch}')
 
             if self.lr_scheduler:
-                logger.info(f'LR was set to : {self.lr_scheduler.get_lr()}')
-                lr_metric.extend(self.lr_scheduler.get_lr())
+                lr_value = [group['lr']
+                            for group in self.optimizer.param_groups][0]
+                logger.info(f'LR was set to : {lr_value}')
+                lr_metric.extend(lr_value)
 
             trn_metric = self._train_epoch(epoch)  # train this epoch
 

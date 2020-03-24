@@ -76,9 +76,9 @@ class Runner:
 
         plt.style.use("dark_background")
         self.lr_finder.plot()
+
+        # reset the model and the optimizer
         self.lr_finder.reset()
-        plt.annotate(f'{self.best_lr}',
-                     (self.best_lr, self.lr_finder.best_loss))
         plt.show()
 
         del model, optimizer, criterion
