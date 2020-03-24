@@ -8,10 +8,10 @@ with open('requirements.txt', 'r') as fh:
 
 setuptools.setup(
     name="sodium",  # Replace with your own username
-    version="0.0.1",
+    version="0.0.2",
     author="Satyajit Ghana",
     author_email="satyajitghana7@gmail.com",
-    description="A small example package",
+    description="PySodium",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/satyajitghana/PySodium",

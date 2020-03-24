@@ -13,9 +13,14 @@ import sodium.model.loss as module_loss
 import sodium.data_loader.augmentation as module_aug
 import sodium.data_loader.data_loaders as module_data
 
-from sodium.trainer import Trainer
+from sodium.trainer import Trainer, LRFinder
 import sodium.plot as plot
 from sodium.gradcam import get_gradcam, plot_gradcam
+
+from pprint import pformat
+import pprint
+
+import copy
 
 logger = setup_logger(__name__)
 
@@ -24,7 +29,15 @@ class Runner:
     def __init__(self, config):
         self.config = config
 
-    def train(self, tsai_mode=False):
+    def find_lr(self):
+        logger.info('finding the best learning rate')
+        self.lr_finder.find_lr()
+
+    def train(self):
+        self.trainer.train()
+        logger.info('Finished!')
+
+    def setup_train(self, tsai_mode=False):
         cfg = self.config
 
         if tsai_mode:
@@ -32,7 +45,11 @@ class Runner:
         else:
             import sodium.model.model as module_arch
 
-        logger.info(f'Training: {cfg}')
+        logger.info('Training Config')
+
+        # display the config
+        for line in pprint.pformat(cfg).split('\n'):
+            logger.info(line)
 
         # to get consistent results, seed everything
         seed_everything(cfg['seed'])
@@ -54,6 +71,13 @@ class Runner:
             module_data, 'data_loader', cfg, self.transforms)
         train_loader, test_loader = self.data_loader.get_loaders()
 
+        logger.info('Getting loss function handle')
+        criterion = getattr(module_loss, cfg['criterion'])()
+
+        # create the lr finder without the scheduler
+        self.lr_finder = LRFinder(model, copy.deepcopy(
+            optimizer), criterion, device, train_loader, test_loader)
+
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
             sch_cfg = cfg['lr_scheduler']['args']
@@ -63,20 +87,14 @@ class Runner:
             lr_scheduler = get_instance(
                 module_scheduler, 'lr_scheduler', cfg, optimizer)
 
-        logger.info('Getting loss function handle')
-        criterion = getattr(module_loss, cfg['criterion'])()
-
         logger.info('Initializing trainer')
         self.trainer = Trainer(model, criterion, optimizer, cfg, device,
-                               train_loader, test_loader, lr_scheduler=lr_scheduler)
-
-        self.trainer.train()
-
-        logger.info('Finished!')
+                               train_loader, test_loader, lr_scheduler=lr_scheduler, batch_scheduler=cfg['lr_scheduler']['args']['batch_scheduler'])
 
     def plot_metrics(self):
         logger.info('Plotting Metrics...')
         plot.plot_metrics(self.trainer.train_metric, self.trainer.test_metric)
+        plot.plot_lr_metric(self.trainer.lr_metric)
 
     def plot_gradcam(self, target_layers):
         logger.info('Plotting Grad-CAM...')

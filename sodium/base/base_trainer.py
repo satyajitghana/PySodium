@@ -5,13 +5,13 @@ import yaml
 import torch
 
 from sodium.utils import setup_logger
+from sodium.metrics import Metrics
 
 logger = setup_logger(__name__)
 
 
 class BaseTrainer:
-    """Base Trainer for all models
-    """
+    '''Base Trainer for all models'''
 
     def __init__(self, model, criterion, optimizer, config, device):
         self.model = model
@@ -19,8 +19,9 @@ class BaseTrainer:
         self.optimizer = optimizer
         self.config = config
         self.device = device
-
+        self.lr_scheduler = None
         self.epochs = config['training']['epochs']
+        self.metrics = Metrics()
 
     def train(self) -> Tuple[List, List]:
         logger.info('Starting training ...')
@@ -30,13 +31,18 @@ class BaseTrainer:
         train_accuracy = []
         test_loss = []
         test_accracy = []
+        lr_metric = []
 
         for epoch in range(1, self.epochs+1):
-            print(f'\nTraining Epoch: {epoch}')
+            logger.info(f'Training Epoch: {epoch}')
+
+            if self.lr_scheduler:
+                logger.info(f'LR was set to : {self.lr_scheduler.get_lr()}')
+                lr_metric.extend(self.lr_scheduler.get_lr())
 
             trn_metric = self._train_epoch(epoch)  # train this epoch
 
-            print(f'Testing Epoch: {epoch}')
+            logger.info(f'Testing Epoch: {epoch}')
 
             tst_metric = self._test_epoch(epoch)  # test this epoch
 
@@ -47,6 +53,7 @@ class BaseTrainer:
 
         self.train_metric = (train_loss, train_accuracy)
         self.test_metric = (test_loss, test_accracy)
+        self.lr_metric = lr_metric
 
         return (self.train_metric, self.test_metric)
 

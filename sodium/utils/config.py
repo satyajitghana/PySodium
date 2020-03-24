@@ -12,9 +12,7 @@ logger = setup_logger(__name__)
 
 
 def load_config(filename: str) -> dict:
-    """
-    Load a configuration file as YAML
-    """
+    '''Load a configuration file as YAML'''
     with open(filename) as fh:
         config = yaml.safe_load(fh)
 
@@ -22,6 +20,7 @@ def load_config(filename: str) -> dict:
 
 
 def setup_device(model: nn.Module, target_device: int) -> Tuple[torch.device, List[int]]:
+    '''sets up the device for the model'''
     available_devices = list(range(torch.cuda.device_count()))
     logger.info(
         f'Using device {target_device} of available devices {available_devices}')
@@ -37,6 +36,7 @@ def setup_param_groups(model: nn.Module, config: Dict) -> List:
 
 
 def get_instance(module: ModuleType, name: str, config: Dict, *args: Any) -> Any:
+    '''creates an instance from a constructor name and module name'''
     ctor_name = config[name]['type']
     logger.info(f'Building: {module.__name__}.{ctor_name}')
     return getattr(module, ctor_name)(*args, **config[name]['args'])

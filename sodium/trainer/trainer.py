@@ -6,16 +6,41 @@ from sodium.base import BaseTrainer
 from tqdm.auto import tqdm, trange
 import torch
 
+# from torch_lr_finder import LRFinder
+import torch_lr_finder as lr_finder
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+plt.style.use("dark_background")
+
 logger = setup_logger(__name__)
 
 
+class LRFinder(lr_finder.LRFinder):
+    def __init__(self, model, optimizer, criterion, device, train_loader, test_loader):
+        super().__init__(model, optimizer, criterion, device=device)
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+
+    def find_lr(self):
+
+        self.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
+                        end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+        self.plot()
+        self.reset()
+
+        plt.show()
+
+
 class Trainer(BaseTrainer):
-    def __init__(self, model, loss, optimizer, config, device, train_loader, test_loader, lr_scheduler=None):
+    def __init__(self, model, loss, optimizer, config, device, train_loader, test_loader, lr_scheduler=None, batch_scheduler=False):
         super().__init__(model, loss, optimizer, config, device)
 
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.lr_scheduler = lr_scheduler
+        self.batch_scheduler = batch_scheduler
 
     def _train_epoch(self, epoch: int) -> List[Tuple]:
 
@@ -61,13 +86,13 @@ class Trainer(BaseTrainer):
             accuracy_history.append(100.*correct/processed)
             loss_history.append(loss.data.cpu().numpy().item())
 
-            if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
+            if self.batch_scheduler:
                 self.lr_scheduler.step()
 
         torch.cuda.empty_cache()
 
         # check if there's a lr scheduler
-        if (self.lr_scheduler is not None) and not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
+        if (self.lr_scheduler is not None) and not self.batch_scheduler:
             self.lr_scheduler.step()
 
         return (loss_history, accuracy_history)

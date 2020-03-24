@@ -21,6 +21,13 @@ def plot_metrics(train_metric, test_metric):
     plt.show()
 
 
+def plot_lr_metric(lr_metric):
+    plt.figure(figsize=(8, 10))
+    plt.plot(lr_metric)
+    plt.title('Learning Rate')
+    plt.show()
+
+
 def plot_misclassification(misclassified):
     print('Total Misclassifications : {}'.format(len(misclassified)))
     num_images = 25

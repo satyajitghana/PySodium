@@ -31,13 +31,24 @@ if __name__ == "__main__":
     # parse the arguments
     args = parser.parse_args()
 
+    # load the config
     config = load_config(args.config)
 
     # create a runner
     runner = runner.Runner(config)
 
+    # setup train parameters
+    runner.setup_train(tsai_mode=args.tsai_mode)
+
+    # find lr
+    runner.find_lr()
+
     # train the network
-    runner.train(tsai_mode=args.tsai_mode)
+    runner.train()
 
     # plot metrics
-    runner.plot()
+    runner.plot_metrics()
+
+    # plot gradcam
+    target_layers = ["layer1", "layer2", "layer3", "layer4"]
+    runner.plot_gradcam(target_layers=target_layers)
