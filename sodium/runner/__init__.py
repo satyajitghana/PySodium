@@ -83,12 +83,16 @@ class Runner:
 
         del model, optimizer, criterion
 
-    def train(self, use_bestlr=False):
+    def train(self, use_bestlr=False, lr_value=None):
 
         # if the best lr was found use that value instead
         if use_bestlr and self.best_lr is not None:
             for param_group in self.trainer.optimizer.param_groups:
                 param_group['lr'] = self.best_lr
+
+        if not use_bestlr and (lr_value is not None):
+            for param_group in self.trainer.optimizer.param_groups:
+                param_group['lr'] = lr_value
 
         self.trainer.train()
         logger.info('Finished!')

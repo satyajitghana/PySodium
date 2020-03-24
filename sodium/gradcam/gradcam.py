@@ -89,7 +89,7 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
             heatmap_img = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
             superimposed_img = cv2.addWeighted(
-                (denorm_img.numpy() * 255).astype(np.uint8), 0.5, heatmap_img, 0.5, 0)
+                (denorm_img.numpy() * 255).astype(np.uint8), 0.6, heatmap_img, 0.4, 0)
 
             axs[image_idx, layer_idx +
                 2].imshow(superimposed_img, interpolation='bilinear')
