@@ -65,7 +65,7 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
     target_labels = target_labels.cpu()
 
     fig, axs = plt.subplots(nrows=len(images), ncols=len(
-        gcam_layers.keys())+1, figsize=(len(gcam_layers.keys())*3, len(images)*3))
+        gcam_layers.keys())+2, figsize=((len(gcam_layers.keys()) + 2)*3, len(images)*3))
     fig.suptitle("Grad-CAM", fontsize=16)
 
     for image_idx, image in enumerate(images):
@@ -75,9 +75,11 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
 
         axs[image_idx, 0].imshow(
             (denorm_img.numpy() * 255).astype(np.uint8),  interpolation='bilinear')
-        axs[image_idx, 0].set_title(
-            f'predicted: {class_labels[predicted_labels[image_idx][0] ]}\nactual: {class_labels[target_labels[image_idx]] }')
         axs[image_idx, 0].axis('off')
+
+        axs[image_idx, 1].text(
+            0.5, 0.5, f'predicted: {class_labels[predicted_labels[image_idx][0] ]}\nactual: {class_labels[target_labels[image_idx]] }', horizontalalignment='center', verticalalignment='center', fontsize=14, )
+        axs[image_idx, 1].axis('off')
 
         for layer_idx, layer_name in enumerate(gcam_layers.keys()):
             # gets H X W of the cam layer
@@ -90,10 +92,10 @@ def plot_gradcam(gcam_layers, images, target_labels, predicted_labels, class_lab
                 (denorm_img.numpy() * 255).astype(np.uint8), 0.5, heatmap_img, 0.5, 0)
 
             axs[image_idx, layer_idx +
-                1].imshow(superimposed_img, interpolation='bilinear')
+                2].imshow(superimposed_img, interpolation='bilinear')
             axs[image_idx, layer_idx+1].set_title(f'layer: {layer_name}')
             axs[image_idx, layer_idx+1].axis('off')
 
-    plt.tight_layout(pad=1.0)
-    plt.subplots_adjust(top=0.2)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.1)
     plt.show()
