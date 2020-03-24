@@ -48,7 +48,7 @@ class BaseTrainer:
 
             tst_metric = self._test_epoch(epoch)  # test this epoch
 
-            if isinstance(self.lr_scheduler, torch.optim.ReduceLROnPlateau):
+            if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 val_loss = tst_metric[0]
                 self.lr_scheduler.step(val_loss)
 

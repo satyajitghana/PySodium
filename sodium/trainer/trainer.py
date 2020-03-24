@@ -67,12 +67,12 @@ class Trainer(BaseTrainer):
             accuracy_history.append(100.*correct/processed)
             loss_history.append(loss.data.cpu().numpy().item())
 
-            if isinstance(self.lr_scheduler, torch.optim.OneCycleLR):
+            if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.OneCycleLR):
                 self.lr_scheduler.step()
 
         torch.cuda.empty_cache()
 
-        if isinstance(self.lr_scheduler, torch.optim.StepLR):
+        if isinstance(self.lr_scheduler, torch.optim.lr_scheduler.StepLR):
             self.lr_scheduler.step()
 
         return (loss_history, accuracy_history)

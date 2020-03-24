@@ -220,10 +220,10 @@ class Runner:
         misclassified_pred = torch.cat(misclassified_pred)
         misclassified_target = torch.cat(misclassified_target)
 
-        logger.info('Taking {5} samples')
+        logger.info('Taking {25} samples')
         # get 5 images
-        data = misclassified[:5]
-        target = misclassified_target[:5]
+        data = misclassified[:25]
+        target = misclassified_target[:25]
 
         # get the generated grad cam
         gcam_layers, predicted_probs, predicted_classes = get_gradcam(
