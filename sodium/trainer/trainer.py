@@ -112,4 +112,4 @@ class Trainer(BaseTrainer):
         loss_history.append(test_loss/len(self.test_loader))
         accuracy_history.append((100. * correct) / total)
 
-        return (loss_history, accuracy_history)
+        return (loss_history, accuracy_history, test_loss)
