@@ -22,7 +22,7 @@ def plot_metrics(train_metric, test_metric):
 
 
 def plot_lr_metric(lr_metric):
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(7, 5))
     plt.plot(lr_metric)
     plt.title('Learning Rate')
     plt.show()
