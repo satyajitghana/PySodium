@@ -22,7 +22,6 @@ import pprint
 
 import copy
 
-from torch_lr_finder import LRFinder
 
 logger = setup_logger(__name__)
 
@@ -32,7 +31,16 @@ class Runner:
         self.config = config
 
     def find_lr(self):
+        from torch_lr_finder import LRFinder
+
         logger.info('finding the best learning rate')
+
+        cfg = self.config
+
+        if self.tsai_mode:
+            import sodium.tsai_model as module_arch
+        else:
+            import sodium.model.model as module_arch
 
         # create a model instance
         model = get_instance(module_arch, 'arch', cfg)
@@ -48,10 +56,9 @@ class Runner:
 
         self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
 
-        self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
-                                  end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+        self.lr_finder.range_test(self.trainer.train_loader, val_loader=self.trainer.test_loader, start_lr=1e-3,
+                                  end_lr=2, num_iter=len(self.trainer.train_loader)//self.trainer.train_loader.batch_size, step_mode='exp')
 
-        self.lr_finder.find_lr()
         self.lr_finder.plot()
         self.lr_finder.reset()
 
@@ -63,6 +70,8 @@ class Runner:
 
     def setup_train(self, tsai_mode=False):
         cfg = self.config
+
+        self.tsai_mode = tsai_mode
 
         if tsai_mode:
             import sodium.tsai_model as module_arch
