@@ -107,7 +107,7 @@ class Trainer(BaseTrainer):
                 # pbar.set_description(
                 #     desc=f'epoch={epoch+batch_idx/len(pbar):.2f} | loss={test_loss/(batch_idx+1):.10f} | accuracy={100.*correct/total:.2f} {correct}/{total} | batch_id={batch_idx}')
 
-        print(
+        logger.info(
             f'Test Set: Average Loss: {test_loss/len(self.test_loader):.8f}, Accuracy: {100. * correct / total:.2f} ({correct}/{total})')
 
         loss_history.append(test_loss/len(self.test_loader))

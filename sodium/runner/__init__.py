@@ -22,6 +22,8 @@ import pprint
 
 import copy
 
+from torch_lr_finder import LRFinder
+
 logger = setup_logger(__name__)
 
 
@@ -29,19 +31,31 @@ class Runner:
     def __init__(self, config):
         self.config = config
 
-    # def find_lr(self):
-    #     logger.info('finding the best learning rate')
+    def find_lr(self):
+        logger.info('finding the best learning rate')
 
-    #     self.lr_finder =
+        # create a model instance
+        model = get_instance(module_arch, 'arch', cfg)
 
-    #     self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
-    #                               end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+        # setup the model with the device
+        model, device = setup_device(model, cfg['target_device'])
 
-    #     self.lr_finder.find_lr()
-    #     self.lr_finder.plot()
-    #     self.lr_finder.reset()
+        param_groups = setup_param_groups(model, cfg['optimizer'])
+        optimizer = get_instance(
+            module_optimizer, 'optimizer', cfg, param_groups)
 
-    #     plt.show()
+        criterion = getattr(module_loss, cfg['criterion'])()
+
+        self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
+
+        self.lr_finder.range_test(self.train_loader, val_loader=self.test_loader, start_lr=1e-3,
+                                  end_lr=2, num_iter=len(self.train_loader)//self.train_loader.batch_size, step_mode='exp')
+
+        self.lr_finder.find_lr()
+        self.lr_finder.plot()
+        self.lr_finder.reset()
+
+        del model, optimizer, criterion
 
     def train(self):
         self.trainer.train()

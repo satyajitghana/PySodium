@@ -31,7 +31,7 @@ def plot_lr_metric(lr_metric):
 def plot_misclassification(misclassified):
     print('Total Misclassifications : {}'.format(len(misclassified)))
     num_images = 25
-    fig = plt.figure(figsize=(12, 14))
+    fig = plt.figure(figsize=(12, 10))
     fig.suptitle('Misclassifications')
     for idx, (image, pred, target) in enumerate(misclassified[:num_images]):
         image, pred, target = image.cpu().numpy(), pred.cpu(), target.cpu()
