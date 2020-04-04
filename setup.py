@@ -1,13 +1,13 @@
 import setuptools
 
-with open('README.md', 'r') as fh:
+with open('README.md', 'r', encoding='utf8') as fh:
     long_description = fh.read()
 
 with open('requirements.txt', 'r') as fh:
     required = fh.read().splitlines()
 
 setuptools.setup(
-    name="sodium",  # Replace with your own username
+    name="py-sodium",  # Replace with your own username
     version="0.0.2",
     author="Satyajit Ghana",
     author_email="satyajitghana7@gmail.com",

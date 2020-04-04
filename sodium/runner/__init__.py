@@ -59,8 +59,9 @@ class Runner:
 
         self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
 
-        self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
-                                  end_lr=5, num_iter=len(self.trainer.train_loader), step_mode='exp')
+        # leslie smith's approach
+        self.lr_finder.range_test(self.trainer.train_loader, val_loader=self.trainer.test_loader,
+                                  end_lr=1, num_iter=len(self.trainer.train_loader), step_mode='linear')
 
         self.best_lr = self.lr_finder.history['lr'][self.lr_finder.history['loss'].index(
             self.lr_finder.best_loss)]
