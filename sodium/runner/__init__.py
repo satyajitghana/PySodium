@@ -61,7 +61,7 @@ class Runner:
 
         # my method
         self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
-                                  end_lr=10, num_iter=len(self.trainer.train_loader), step_mode='exp')
+                                  end_lr=5, num_iter=len(self.trainer.test_loader), step_mode='exp')
 
         # leslie smith method
         # self.lr_finder.range_test(self.trainer.train_loader, val_loader = self.trainer.test_loader,
