@@ -71,6 +71,7 @@ class CIFAR10S11Model(nn.Module):
         self.layer2 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=256, kernel_size=(3, 3), padding=1,
                       stride=1, bias=False),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.BatchNorm2d(num_features=256),
             nn.ReLU()
         )
