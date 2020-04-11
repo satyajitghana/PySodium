@@ -157,7 +157,8 @@ class Runner:
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
             max_at_epoch = cfg['lr_scheduler']['max_lr_at_epoch']
-            pct_start = max_at_epoch ? max_at_epoch/cgf['training']['epochs']: 0.8
+            pct_start = max_at_epoch / \
+                cfg['training']['epochs'] if max_at_epoch else 0.8
             sch_cfg = cfg['lr_scheduler']['args']
             lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), pct_start=pct_start, epochs=cfg['training']['epochs'])

@@ -19,12 +19,13 @@ data_loader:
         nworkers: 4
         shuffle: True
 
-lr_test:
+lr_finder:
     epochs: 50
 
 criterion: cross_entropy_loss
 
 lr_scheduler:
+    max_lr_at_epoch: 5
     type: OneCycleLR
     args:
         max_lr: 0.1
@@ -37,4 +38,4 @@ optimizer:
         weight_decay: 0.0005
 
 training:
-    epochs: 1
+    epochs: 24
