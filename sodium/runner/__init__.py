@@ -216,6 +216,7 @@ class Runner:
         # plot graph of variable, not of a nn.Module
         dot_graph = torchviz.make_dot(out)
         dot_graph.view()
+        return dot_graph
 
     def plot_misclassifications(self, target_layers):
         plt.style.use("dark_background")
