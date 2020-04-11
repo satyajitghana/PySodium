@@ -80,7 +80,7 @@ class CIFAR10S11Model(nn.Module):
         self.mp = nn.MaxPool2d(kernel_size=4, stride=1)
 
         self.fc_layer = nn.Conv2d(
-            in_channels=512, out_channels=10, kernel_size=1, stride=1)
+            in_channels=512, out_channels=10, kernel_size=1, stride=1, bias=False)
 
     def forward(self, x):
         out = self.prep_layer(x)

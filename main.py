@@ -40,11 +40,14 @@ if __name__ == "__main__":
     # setup train parameters
     runner.setup_train(tsai_mode=args.tsai_mode)
 
+    # print the model summary
+    runner.print_summary(input_size=(3, 32, 32))
+
     # find lr
-    # runner.find_lr()
+    runner.find_lr()
 
     # train the network
-    runner.train(use_bestlr=False)
+    runner.train(use_bestlr=True)
 
     # plot metrics
     runner.plot_metrics()

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as module_optimizer
 import torch.optim.lr_scheduler as module_scheduler
 from torchvision import datasets, transforms
+from torchsummary import summary
 
 from typing import Any, List, Tuple, Dict
 from types import ModuleType
@@ -61,7 +62,7 @@ class Runner:
 
         # my method
         self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
-                                  end_lr=5, num_iter=len(self.trainer.test_loader), step_mode='exp')
+                                  end_lr=1, num_iter=len(self.trainer.test_loader), step_mode='exp')
 
         # leslie smith method
         # self.lr_finder.range_test(self.trainer.train_loader, val_loader = self.trainer.test_loader,
@@ -188,6 +189,9 @@ class Runner:
 
         plot_gradcam(gcam_layers, data, target, predicted_classes,
                      self.data_loader.class_names, unorm)
+
+    def print_summary(self, input_size):
+        summary(self.trainer.model, input_size)
 
     def plot_misclassifications(self, target_layers):
         assert(self.trainer.model is not None)
