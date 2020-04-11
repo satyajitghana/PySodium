@@ -23,6 +23,8 @@ import pprint
 
 import copy
 
+import torchviz
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set()
@@ -61,6 +63,7 @@ class Runner:
         self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
 
         lr_finder_epochs = cfg['lr_finder']['epochs']
+        logger.info(f'Running LR-Test for {lr_finder_epochs} epochs')
         # my method
         self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
                                   end_lr=1, num_iter=len(self.trainer.test_loader) * lr_finder_epochs, step_mode='linear')
@@ -102,7 +105,7 @@ class Runner:
             logger.info(f'using min_lr : {self.best_lr/20}')
             logger.info(f'using initial_lr : {self.best_lr/10}')
             for param_group in self.trainer.optimizer.param_groups:
-                # param_group['lr'] = self.best_lr
+                param_group['lr'] = self.best_lr / 10
                 param_group['max_lr'] = self.best_lr
                 param_group['min_lr'] = self.best_lr / 20
                 param_group['intial_lr'] = self.best_lr / 10
@@ -172,11 +175,13 @@ class Runner:
                                train_loader, test_loader, lr_scheduler=lr_scheduler, batch_scheduler=batch_scheduler)
 
     def plot_metrics(self):
+        plt.style.use("dark_background")
         logger.info('Plotting Metrics...')
         plot.plot_metrics(self.trainer.train_metric, self.trainer.test_metric)
         plot.plot_lr_metric(self.trainer.lr_metric)
 
     def plot_gradcam(self, target_layers):
+        plt.style.use("dark_background")
         logger.info('Plotting Grad-CAM...')
 
         # use the test images
@@ -203,7 +208,15 @@ class Runner:
     def print_summary(self, input_size):
         summary(self.trainer.model, input_size)
 
+    def print_visualization(self, input_size):
+        C, H, W = input_size
+        x = torch.zeros(1, C, H, W, dtype=torch.float, requires_grad=False)
+        x = x.to(self.trainer.device)
+        out = self.trainer.model(x)
+        torchviz.make_dot(out)  # plot graph of variable, not of a nn.Module
+
     def plot_misclassifications(self, target_layers):
+        plt.style.use("dark_background")
         assert(self.trainer.model is not None)
         # get the data, target of only missclassified and do what you do for gradcam
 
