@@ -72,7 +72,7 @@ class CIFAR10Albumentations(AugmentationFactoryBase):
             A.HorizontalFlip(),
             A.Normalize(mean=self.mean,
                         std=self.std),
-            A.Cutout(num_holes=4, fill_value=self.mean),
+            A.Cutout(num_holes=4),
             AT.ToTensor()
         ])
 
