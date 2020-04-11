@@ -19,6 +19,9 @@ data_loader:
         nworkers: 4
         shuffle: True
 
+lr_test:
+    epochs: 50
+
 criterion: cross_entropy_loss
 
 lr_scheduler:

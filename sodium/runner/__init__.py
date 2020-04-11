@@ -60,9 +60,10 @@ class Runner:
 
         self.lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
 
+        lr_finder_epochs = cfg['lr_finder']['epochs']
         # my method
         self.lr_finder.range_test(self.trainer.train_loader, start_lr=1e-3,
-                                  end_lr=1, num_iter=len(self.trainer.test_loader), step_mode='exp')
+                                  end_lr=1, num_iter=len(self.trainer.test_loader) * lr_finder_epochs, step_mode='linear')
 
         # leslie smith method
         # self.lr_finder.range_test(self.trainer.train_loader, val_loader = self.trainer.test_loader,
@@ -97,8 +98,14 @@ class Runner:
 
         # if the best lr was found use that value instead
         if use_bestlr and self.best_lr is not None:
+            logger.log(f'using max_lr : {self.best_lr}')
+            logger.log(f'using min_lr : {self.best_lr/20}')
+            logger.log(f'using initial_lr : {self.best_lr/10}')
             for param_group in self.trainer.optimizer.param_groups:
-                param_group['lr'] = self.best_lr
+                # param_group['lr'] = self.best_lr
+                param_group['max_lr'] = self.best_lr
+                param_group['min_lr'] = self.best_lr / 20
+                param_group['intial_lr'] = self.best_lr / 10
 
         if not use_bestlr and (lr_value is not None):
             for param_group in self.trainer.optimizer.param_groups:
@@ -149,9 +156,11 @@ class Runner:
         batch_scheduler = False
         if cfg['lr_scheduler']['type'] == 'OneCycleLR':
             logger.info('Building: torch.optim.lr_scheduler.OneCycleLR')
+            max_at_epoch = cfg['lr_scheduler']['max_lr_at_epoch']
+            pct_start = max_at_epoch ? max_at_epoch/cgf['training']['epochs']: 0.8
             sch_cfg = cfg['lr_scheduler']['args']
             lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(
-                optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), epochs=cfg['training']['epochs'])
+                optimizer, max_lr=sch_cfg['max_lr'], steps_per_epoch=len(train_loader), pct_start=pct_start, epochs=cfg['training']['epochs'])
             batch_scheduler = True
         else:
             lr_scheduler = get_instance(
