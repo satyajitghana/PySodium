@@ -213,7 +213,9 @@ class Runner:
         x = torch.zeros(1, C, H, W, dtype=torch.float, requires_grad=False)
         x = x.to(self.trainer.device)
         out = self.trainer.model(x)
-        torchviz.make_dot(out)  # plot graph of variable, not of a nn.Module
+        # plot graph of variable, not of a nn.Module
+        dot_graph = torchviz.make_dot(out)
+        dot_graph.view()
 
     def plot_misclassifications(self, target_layers):
         plt.style.use("dark_background")
