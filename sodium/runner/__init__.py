@@ -107,7 +107,7 @@ class Runner:
             for param_group in self.trainer.optimizer.param_groups:
                 param_group['lr'] = self.best_lr / 10
                 param_group['max_lr'] = self.best_lr
-                param_group['min_lr'] = self.best_lr / 20
+                param_group['min_lr'] = self.best_lr / 25
                 param_group['intial_lr'] = self.best_lr / 10
 
         if not use_bestlr and (lr_value is not None):
