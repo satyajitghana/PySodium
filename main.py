@@ -41,10 +41,10 @@ if __name__ == "__main__":
     runner.setup_train(tsai_mode=args.tsai_mode)
 
     # find lr
-    runner.find_lr()
+    # runner.find_lr()
 
     # train the network
-    runner.train(use_bestlr=True)
+    runner.train(use_bestlr=False)
 
     # plot metrics
     runner.plot_metrics()
