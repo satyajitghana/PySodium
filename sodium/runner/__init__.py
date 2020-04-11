@@ -98,9 +98,9 @@ class Runner:
 
         # if the best lr was found use that value instead
         if use_bestlr and self.best_lr is not None:
-            logger.log(f'using max_lr : {self.best_lr}')
-            logger.log(f'using min_lr : {self.best_lr/20}')
-            logger.log(f'using initial_lr : {self.best_lr/10}')
+            logger.info(f'using max_lr : {self.best_lr}')
+            logger.info(f'using min_lr : {self.best_lr/20}')
+            logger.info(f'using initial_lr : {self.best_lr/10}')
             for param_group in self.trainer.optimizer.param_groups:
                 # param_group['lr'] = self.best_lr
                 param_group['max_lr'] = self.best_lr
