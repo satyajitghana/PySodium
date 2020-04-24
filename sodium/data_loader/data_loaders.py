@@ -83,6 +83,11 @@ class TinyImageNet(Dataset):
     filename = 'tiny-imagenet-200.zip'
     dataset_folder_name = 'tiny-imagenet-200'
 
+    EXTENSION = 'JPEG'
+    NUM_IMAGES_PER_CLASS = 500
+    CLASS_LIST_FILE = 'wnids.txt'
+    VAL_ANNOTATION_FILE = 'val_annotations.txt'
+
     def __init__(self, root, train=True, transform=None, target_transform=None, download=False):
         self.root = root
         self.transform = transform
@@ -92,13 +97,13 @@ class TinyImageNet(Dataset):
         self.split_dir = os.path.join(
             self.root, self.dataset_folder_name, self.split_dir)
         self.image_paths = sorted(glob.iglob(os.path.join(
-            self.split_dir, '**', '*.%s' % EXTENSION), recursive=True))
+            self.split_dir, '**', '*.%s' % self.EXTENSION), recursive=True))
 
         self.target = []
         self.labels = {}
 
         # build class label - number mapping
-        with open(os.path.join(self.root, self.dataset_folder_name, CLASS_LIST_FILE), 'r') as fp:
+        with open(os.path.join(self.root, self.dataset_folder_name, self.CLASS_LIST_FILE), 'r') as fp:
             self.label_texts = sorted([text.strip()
                                        for text in fp.readlines()])
         self.label_text_to_number = {
@@ -107,12 +112,12 @@ class TinyImageNet(Dataset):
         # build labels for NUM_IMAGES_PER_CLASS images
         if train:
             for label_text, i in self.label_text_to_number.items():
-                for cnt in range(NUM_IMAGES_PER_CLASS):
-                    self.labels[f'{label_text}_{cnt}.{EXTENSION}'] = i
+                for cnt in range(self.NUM_IMAGES_PER_CLASS):
+                    self.labels[f'{label_text}_{cnt}.{self.EXTENSION}'] = i
 
         # build the validation dataset
         else:
-            with open(os.path.join(self.split_dir, VAL_ANNOTATION_FILE), 'r') as fp:
+            with open(os.path.join(self.split_dir, self.VAL_ANNOTATION_FILE), 'r') as fp:
                 for line in fp.readlines():
                     terms = line.split('\t')
                     file_name, label_text = terms[0], terms[1]
