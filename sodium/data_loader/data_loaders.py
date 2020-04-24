@@ -93,6 +93,9 @@ class TinyImageNet(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
+        if download:
+            self.download()
+
         self.split_dir = 'train' if train else 'val'
         self.split_dir = os.path.join(
             self.root, self.dataset_folder_name, self.split_dir)
@@ -125,9 +128,6 @@ class TinyImageNet(Dataset):
 
         self.target = [self.labels[os.path.basename(
             filename)] for filename in self.image_paths]
-
-        if download:
-            self.download()
 
     def download(self):
         download_and_extract_archive(
