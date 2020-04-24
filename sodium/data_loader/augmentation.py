@@ -88,7 +88,35 @@ class CIFAR10Albumentations(AugmentationFactoryBase):
         return AlbumentationTransforms(test_transforms)
 
 
-class UnNormalize(object):
+class TinyImageNetAlbumentations(AugmentationFactoryBase):
+
+    mean = [0.4802, 0.4481, 0.3975]
+    std = [0.2302, 0.2265, 0.2262]
+
+    def build_train(self):
+        train_transforms = A.Compose([
+            A.RandomCrop(64, 64),
+            A.Rotate((-30.0, 30.0)),
+            A.HorizontalFlip(),
+            A.Normalize(mean=self.mean,
+                        std=self.std),
+            A.Cutout(num_holes=4),
+            AT.ToTensor()
+        ])
+
+        return AlbumentationTransforms(train_transforms)
+
+    def build_test(self):
+        test_transforms = A.Compose([
+            A.Normalize(mean=self.mean,
+                        std=self.std),
+            AT.ToTensor()
+        ])
+
+        return AlbumentationTransforms(test_transforms)
+
+
+class UnNormalize:
     def __init__(self, mean, std):
         self.mean = mean
         self.std = std

@@ -1,0 +1,41 @@
+name: TinyImageNet
+save_dir: saved/
+seed: 1
+target_device: 0
+
+arch:
+    type: TinyImageNetS12Model
+    args: {}
+
+augmentation:
+    type: TinyImageNetAlbumentations
+    args: {}
+
+data_loader:
+    type: TinyImageNetDataLoader
+    args:
+        batch_size: 128
+        data_dir: data/
+        nworkers: 4
+        shuffle: True
+
+lr_finder:
+    epochs: 20
+
+criterion: cross_entropy_loss
+
+lr_scheduler:
+    max_lr_at_epoch: 20
+    type: OneCycleLR
+    args:
+        max_lr: 0.1
+
+optimizer:
+    type: SGD
+    args:
+        lr: 0.001
+        momentum: 0.95
+        weight_decay: 0.0005
+
+training:
+    epochs: 50

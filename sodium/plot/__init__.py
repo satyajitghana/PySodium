@@ -41,3 +41,18 @@ def plot_misclassification(misclassified):
             target.item(), pred.item()), fontsize=12)
         ax.imshow(image.squeeze())
     plt.show()
+
+
+def plot_images_horizontally(images, labels):
+    fig = plt.figure(figsize=(15, 7))
+    num_imgs = images.shape[0]
+    for i in range(num_imgs):
+        fig.add_subplot(1, num_imgs, i + 1)
+
+        # render image tensor
+        img = images[i]
+        npimg = img.numpy()
+        npimg = np.transpose(npimg, (1, 2, 0))
+
+        plt.imshow(npimg, cmap='Greys_r')
+        plt.axis('off')
