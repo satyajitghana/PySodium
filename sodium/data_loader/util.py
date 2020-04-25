@@ -5,7 +5,7 @@ import gzip
 import errno
 import tarfile
 import zipfile
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 def gen_bar_updater():

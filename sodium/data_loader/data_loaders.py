@@ -12,7 +12,7 @@ import gzip
 import errno
 import tarfile
 import zipfile
-from tqdm.auto import tqdm
+from tqdm.auto import tqdm, trange
 import glob
 
 from .util import download_and_extract_archive
@@ -93,7 +93,7 @@ class TinyImageNet(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-        if download:
+        if download and (not os.path.isdir(os.path.join(self.root, self.dataset_folder_name))):
             self.download()
 
         self.split_dir = 'train' if train else 'val'
