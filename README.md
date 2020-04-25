@@ -92,6 +92,13 @@ if you are using the library on a terminal, you can use the main.py and call
 
 `python main.py --config=config.yml`
 
+To install OpenCV first update your anaconda environment
+
+```
+conda update --all
+conda install -c conda-forge opencv
+```
+
 
 ---
 
