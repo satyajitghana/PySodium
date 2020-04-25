@@ -94,7 +94,6 @@ class YoloOpenCV:
         self.LABELS = open(labelsPath).read().strip().split("\n")
 
         # initialize a list of colors to represent each possible class label
-        np.random.seed(42)
         self.COLORS = np.random.randint(0, 255, size=(len(self.LABELS), 3),
                                         dtype="uint8")
 
